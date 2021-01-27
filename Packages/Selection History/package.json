@@ -1,0 +1,19 @@
+{
+    "name": "de.peaj.selectionhistory",
+    "version": "1.0.0",
+    "displayName": "Selection History",
+    "description": "Keeps track of previously selected objects and allows selecting previous/next objects",
+    "unity": "2019.4",
+    "unityRelease": "0f1",
+    "dependencies": {
+    },
+   "keywords": [
+      "editor",
+      "history"
+    ],
+    "author": {
+      "name": "Pascal Jacob",
+      "email": "info@peaj.de",
+      "url": "http://peaj.de"
+    }
+  }
