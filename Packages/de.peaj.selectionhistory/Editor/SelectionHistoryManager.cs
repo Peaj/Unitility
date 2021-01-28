@@ -1,7 +1,6 @@
 ﻿//TODO: Add folder selection
 //TODO: Handle deselection
 //TODO: Recover from domain reload
-//TODO: Set proper default keyboard shortcut
 
 using System;
 using System.Collections;
@@ -59,7 +58,7 @@ namespace Unitility.SelectionHistory
             history.Push(new SelectionSnapshot());
         }
 
-        [Shortcut("History/Back", null, KeyCode.LeftArrow, ShortcutModifiers.Alt)]
+        [Shortcut("History/Back", null, KeyCode.Home, ShortcutModifiers.Alt)]
         private static void Back()
         {
             var prev = history.Previous();
@@ -74,7 +73,7 @@ namespace Unitility.SelectionHistory
             prev.Select();
         }
 
-        [Shortcut("History/Forward", null, KeyCode.LeftArrow, ShortcutModifiers.Alt)]
+        [Shortcut("History/Forward", null, KeyCode.End, ShortcutModifiers.Alt)]
         private static void Forward()
         {
             var next = history.Next();
@@ -89,11 +88,10 @@ namespace Unitility.SelectionHistory
             next.Select();
         }
 
-        [Shortcut("History/Clear", null, KeyCode.Home, ShortcutModifiers.Action | ShortcutModifiers.Alt)]
+        [Shortcut("History/Clear", null)]
         private static void Clear()
         {
-            Debug.Log("Clear");
-
+            history.Clear();
         }
     }
 }
