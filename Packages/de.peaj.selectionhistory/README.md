@@ -1,6 +1,12 @@
 # Selection History
 
-Selection History is an editor tool for keeping track of your selection history.
-This allows you to skip back/forward through your recently selected objects.
+Selection History keeps track of your editor selection history.
+It allows you to skip back/forward through your recently selected objects.
 
-Selection History is part of Unitility - a collection of small editor tools that enhances the everyday workflow with Unity.
+It works similar to your browser history or the back/forward function of your favorite IDE.
+
+# Unitility
+
+Unitility is a collection of small editor tools that enhances the everyday workflow with Unity.
+Selection History is the first package of the Unitility collection.
+More will follow in the near future...
