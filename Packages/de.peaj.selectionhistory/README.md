@@ -1,3 +1,5 @@
+[![openupm](https://img.shields.io/npm/v/de.peaj.selectionhistory?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/de.peaj.selectionhistory/)
+
 # Selection History
 
 Selection History keeps track of your editor selection history.
