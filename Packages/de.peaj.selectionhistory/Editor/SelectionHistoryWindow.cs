@@ -10,6 +10,9 @@ namespace Unitility.SelectionHistory
 {
     public class SelectionHistoryWindow : EditorWindow
     {
+        private SelectionSnapshot[] history;
+        private int current;
+        
         [MenuItem("Window/Selection History")]
         static void Init()
         {
@@ -19,23 +22,30 @@ namespace Unitility.SelectionHistory
 
         private void OnEnable()
         {
-            Selection.selectionChanged += Repaint;
+            Refresh();
+            SelectionHistoryManager.HistoryChanged += Refresh;
         }
 
         private void OnDisable()
         {
-            Selection.selectionChanged -= Repaint;
+            SelectionHistoryManager.HistoryChanged -= Refresh;
+        }
+
+        private void Refresh()
+        {
+            this.history = SelectionHistoryManager.History.ToArray().Reverse().ToArray();
+            this.current = SelectionHistoryManager.History.Size - SelectionHistoryManager.History.GetCurrentArrayIndex() - 1;
+            Repaint();
         }
 
         void OnGUI()
         {
-            var array = SelectionHistoryManager.History.ToArray().Reverse().ToArray();
-            var current = SelectionHistoryManager.History.Size - SelectionHistoryManager.History.GetCurrentArrayIndex() - 1;
+            Refresh();
 
-            for (var i = 0; i < array.Length; i++)
+            for (var i = 0; i < this.history.Length; i++)
             {
-                SelectionSnapshot snapshot = array[i];
-                bool isCurrent = i == current;
+                SelectionSnapshot snapshot = this.history[i];
+                bool isCurrent = i == current && !SelectionHistoryManager.SelectionIsEmpty;
 
                 if (!snapshot.IsEmpty)
                 {

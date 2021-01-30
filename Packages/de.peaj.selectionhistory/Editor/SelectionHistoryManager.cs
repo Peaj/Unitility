@@ -26,11 +26,13 @@ namespace Unitility.SelectionHistory
 
         public static HistoryBuffer<SelectionSnapshot> History => history;
         public static SelectionSnapshot Current => History.Current();
+        public static bool SelectionIsEmpty => Selection.activeObject == null;
+        public static Action HistoryChanged;
 
         static SelectionHistoryManager()
         {
             EditorApplication.update += Update;
-            Selection.selectionChanged += SelectionChanged;
+            Selection.selectionChanged += OnSelectionChanged;
         }
 
         private static void Update()
@@ -46,7 +48,7 @@ namespace Unitility.SelectionHistory
         [DllImport("user32.dll")]
         public static extern Int16 GetAsyncKeyState(Int32 virtualKeyCode);
 
-        private static void SelectionChanged()
+        private static void OnSelectionChanged()
         {
             if (ignoreSelectionChange)
             {
@@ -54,14 +56,17 @@ namespace Unitility.SelectionHistory
                 return;
             }
 
-            if (Selection.activeObject == null) return;
+            if (SelectionIsEmpty) return;
             history.Push(new SelectionSnapshot());
+            HistoryChanged.Invoke();
         }
 
         [Shortcut("History/Back", null, KeyCode.Home, ShortcutModifiers.Alt)]
-        private static void Back()
+        public static void Back()
         {
-            var prev = history.Previous();
+            if (history.Size <= 0) return;
+
+            var prev = SelectionIsEmpty?history.Current():history.Previous();
 
             if (prev.IsEmpty) //Next selected object has been destroyed
             {
@@ -71,12 +76,15 @@ namespace Unitility.SelectionHistory
 
             ignoreSelectionChange = true;
             prev.Select();
+            HistoryChanged.Invoke();
         }
 
         [Shortcut("History/Forward", null, KeyCode.End, ShortcutModifiers.Alt)]
-        private static void Forward()
+        public static void Forward()
         {
-            var next = history.Next();
+            if (history.Size <= 0) return;
+            
+            var next = SelectionIsEmpty?history.Current():history.Next();
 
             if (next.IsEmpty) //Next selected object has been destroyed
             {
@@ -86,12 +94,22 @@ namespace Unitility.SelectionHistory
 
             ignoreSelectionChange = true;
             next.Select();
+            HistoryChanged.Invoke();
         }
 
         [Shortcut("History/Clear", null)]
-        private static void Clear()
+        public static void Clear()
         {
             history.Clear();
+            HistoryChanged.Invoke();
+        }
+
+        /// <summary>
+        /// Makes selection history ignore the next selection
+        /// </summary>
+        public static void HideSelectionFromHistory()
+        {
+            ignoreSelectionChange = true;
         }
     }
 }
