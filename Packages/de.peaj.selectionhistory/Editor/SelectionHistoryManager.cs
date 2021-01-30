@@ -58,7 +58,7 @@ namespace Unitility.SelectionHistory
 
             if (SelectionIsEmpty) return;
             history.Push(new SelectionSnapshot());
-            HistoryChanged.Invoke();
+            HistoryChanged?.Invoke();
         }
 
         [Shortcut("History/Back", null, KeyCode.Home, ShortcutModifiers.Alt)]
@@ -76,7 +76,7 @@ namespace Unitility.SelectionHistory
 
             ignoreSelectionChange = true;
             prev.Select();
-            HistoryChanged.Invoke();
+            HistoryChanged?.Invoke();
         }
 
         [Shortcut("History/Forward", null, KeyCode.End, ShortcutModifiers.Alt)]
@@ -94,14 +94,14 @@ namespace Unitility.SelectionHistory
 
             ignoreSelectionChange = true;
             next.Select();
-            HistoryChanged.Invoke();
+            HistoryChanged?.Invoke();
         }
 
         [Shortcut("History/Clear", null)]
         public static void Clear()
         {
             history.Clear();
-            HistoryChanged.Invoke();
+            HistoryChanged?.Invoke();
         }
 
         /// <summary>
