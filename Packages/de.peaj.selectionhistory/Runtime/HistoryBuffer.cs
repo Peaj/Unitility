@@ -6,8 +6,16 @@ namespace Unitility.SelectionHistory
     [Serializable]
     public class HistoryBuffer<T>
     {
-        private readonly T[] array;
-        private readonly int capacity;
+        public static HistoryBuffer<T> FromArray(T[] array, int current, int capacity)
+        {
+            var hb = new HistoryBuffer<T>(capacity);
+            foreach (T item in array) hb.Push(item);
+            hb.current = current;
+            return hb;
+        }
+        
+        private T[] array;
+        private int capacity;
 
         private int current = -1;
         private int first;
@@ -90,7 +98,13 @@ namespace Unitility.SelectionHistory
 
         public int GetCurrentArrayIndex()
         {
+            if (this.current == -1) return -1;
             return IndexDistance(this.last, this.current);
+        }
+        
+        public int SetCurrentArrayIndex(int index)
+        {
+            return Wrap(this.last+index);
         }
 
         private int IndexDistance(int a, int b)

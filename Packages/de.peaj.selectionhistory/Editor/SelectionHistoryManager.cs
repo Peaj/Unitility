@@ -33,6 +33,18 @@ namespace Unitility.SelectionHistory
         {
             EditorApplication.update += Update;
             Selection.selectionChanged += OnSelectionChanged;
+            AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
+            AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
+        }
+
+        private static void OnBeforeAssemblyReload()
+        {
+            SelectionHistoryHelper.SaveSelection(history);
+        } 
+
+        private static void OnAfterAssemblyReload()
+        {
+            history = SelectionHistoryHelper.LoadSelection();
         }
 
         private static void Update()
@@ -57,8 +69,19 @@ namespace Unitility.SelectionHistory
             }
 
             if (SelectionIsEmpty) return;
-            history.Push(new SelectionSnapshot());
+            history.Push(TakeSnapshot());
             HistoryChanged?.Invoke();
+        }
+
+        public static SelectionSnapshot TakeSnapshot()
+        {
+            return new SelectionSnapshot(Selection.activeObject, Selection.objects, Selection.activeContext);
+        }
+
+        public static void Select(SelectionSnapshot snapshot)
+        {
+            Selection.SetActiveObjectWithContext(snapshot.ActiveObject, snapshot.Context);
+            Selection.objects = snapshot.Objects;
         }
 
         [Shortcut("History/Back", null, KeyCode.Home, ShortcutModifiers.Alt)]
@@ -75,7 +98,7 @@ namespace Unitility.SelectionHistory
             }
 
             ignoreSelectionChange = true;
-            prev.Select();
+            Select(prev);
             HistoryChanged?.Invoke();
         }
 
@@ -93,7 +116,7 @@ namespace Unitility.SelectionHistory
             }
 
             ignoreSelectionChange = true;
-            next.Select();
+            Select(next);
             HistoryChanged?.Invoke();
         }
 
