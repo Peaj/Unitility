@@ -20,10 +20,13 @@ namespace Unitility.SelectionHistory
             public static GUIStyle CountBadge = (GUIStyle) "CN CountBadge";
         }
         
+        private static float RowHeight => EditorGUIUtility.singleLineHeight + 2f;
+        
         private SelectionSnapshot[] history;
         private int current;
 
         private Vector2 scrollPosition;
+
         
         [MenuItem("Window/Selection History")]
         static void Init()
@@ -48,13 +51,12 @@ namespace Unitility.SelectionHistory
         {
             this.history = SelectionHistoryManager.History.ToArray().Reverse().ToArray();
             this.current = SelectionHistoryManager.History.Size - SelectionHistoryManager.History.GetCurrentArrayIndex() - 1;
+            this.scrollPosition.y = GetTargetScrollPosition();
             Repaint();
         }
 
         void OnGUI()
         {
-            Refresh();
-
             this.scrollPosition = EditorGUILayout.BeginScrollView(this.scrollPosition);
             for (var i = 0; i < this.history.Length; i++)
             {
@@ -107,6 +109,13 @@ namespace Unitility.SelectionHistory
                     Styles.CountBadge.Draw(countRect, new GUIContent($"+{count - 1}"), 0);
                 }
             }
+        }
+
+        private float GetTargetScrollPosition()
+        {
+            int rowOffset = 3; //TODO: Add setting for how many future items to show
+            int target = this.current - rowOffset;
+            return target * RowHeight;
         }
 
         private static Texture2D GetMiniThumbnail(Object obj)

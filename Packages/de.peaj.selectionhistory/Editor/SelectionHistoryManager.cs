@@ -45,6 +45,7 @@ namespace Unitility.SelectionHistory
         private static void OnAfterAssemblyReload()
         {
             history = SelectionHistoryHelper.LoadSelection();
+            HistoryChanged?.Invoke();
         }
 
         private static void Update()
