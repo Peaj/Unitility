@@ -38,6 +38,9 @@ namespace Unitility.SelectionHistory
             Selection.selectionChanged += OnSelectionChanged;
             AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
             AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
+            // EditorApplication.hierarchyChanged += ClearEmptyEntries;
+            // EditorApplication.projectChanged += ClearEmptyEntries;
+
         }
 
         private static void OnBeforeAssemblyReload()
@@ -109,10 +112,11 @@ namespace Unitility.SelectionHistory
 
             var prev = SelectionIsEmpty?history.Current():history.Previous();
 
-            if (prev.IsEmpty) //Next selected object has been destroyed
+            if (prev.IsEmpty)
             {
+                history.Next();
+                ClearEmptyEntries();
                 Back();
-                return;
             }
 
             ignoreSelectionChange = true;
@@ -127,10 +131,11 @@ namespace Unitility.SelectionHistory
             
             var next = SelectionIsEmpty?history.Current():history.Next();
 
-            if (next.IsEmpty) //Next selected object has been destroyed
+            if (next.IsEmpty)
             {
+                history.Previous();
+                ClearEmptyEntries();
                 Forward();
-                return;
             }
 
             ignoreSelectionChange = true;
@@ -151,6 +156,26 @@ namespace Unitility.SelectionHistory
         public static void HideSelectionFromHistory()
         {
             ignoreSelectionChange = true;
+        }
+
+        /// <summary>
+        /// Removes deleted objects from history buffer
+        /// </summary>
+        private static void ClearEmptyEntries()
+        {
+            var array = history.ToArray().ToList();
+            int current = history.GetCurrentArrayIndex();
+
+            for (int i = array.Count - 1; i >= 0; i--)
+            {
+                if (array[i].IsEmpty)
+                {
+                    array.RemoveAt(i);
+                    if (current >= i) current--;
+                }
+            }
+
+            history = HistoryBuffer<SelectionSnapshot>.FromArray(array.ToArray(), current, 50);
         }
     }
 }
