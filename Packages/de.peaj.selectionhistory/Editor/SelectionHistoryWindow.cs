@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unitility.SelectionHistory;
 using UnityEditor;
+using UnityEditor.Experimental;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
@@ -26,6 +27,7 @@ namespace Unitility.SelectionHistory
         private int current;
 
         private Vector2 scrollPosition;
+        private bool isDragging = false;
 
         
         [MenuItem("Window/Selection History")]
@@ -57,6 +59,7 @@ namespace Unitility.SelectionHistory
 
         void OnGUI()
         {
+            //TODO: Possibly replace with GameObjectTreeViewGUI
             this.scrollPosition = EditorGUILayout.BeginScrollView(this.scrollPosition);
             for (var i = 0; i < this.history.Length; i++)
             {
@@ -95,22 +98,53 @@ namespace Unitility.SelectionHistory
             rowRect.width += 4f;
 
             var currentEvent = Event.current;
+
+            bool hover = rowRect.Contains(currentEvent.mousePosition);
             
             switch (currentEvent.type)
             {
+                case EventType.MouseEnterWindow:
+                    Repaint();
+                    break;
                 case EventType.MouseDown:
-                    if (rowRect.Contains(currentEvent.mousePosition)) Select(index);
-                        break;
+                    if (!hover) break;
+                    this.isDragging = false;
+                    break;
+                case EventType.MouseUp:
+                    if (!hover) break;
+                    this.isDragging = false;
+                    Select(index);
+                    break;
+                case EventType.MouseDrag:
+                    if (!hover) break;
+                    if (!this.isDragging)
+                    {
+                        this.isDragging = true;
+                        DragAndDrop.PrepareStartDrag();
+                        DragAndDrop.StartDrag(snapshot.ActiveObject.name);
+                        DragAndDrop.objectReferences = snapshot.Objects;
+
+                        List<string> paths = new List<string>(snapshot.Objects.Length);
+                        foreach (Object obj in snapshot.Objects)
+                        {
+                            if (EditorUtility.IsPersistent(obj)) paths.Add(AssetDatabase.GetAssetPath(obj));
+                        }
+                        DragAndDrop.paths = paths.ToArray();
+                    }
+
+                    break;
                 case EventType.Repaint:
-                    DrawSelectionSnapShotGUI(rowRect, snapshot, selected);
+                    DrawSelectionSnapShotGUI(rowRect, snapshot, selected, hover);
                     break;
             }
         }
 
-        private void DrawSelectionSnapShotGUI(Rect rect, SelectionSnapshot snapshot, bool selected)
+        private void DrawSelectionSnapShotGUI(Rect rect, SelectionSnapshot snapshot, bool selected, bool hover)
         {
             float paddingLeft = 5f;
             float iconSize = 16f;
+            
+            //TODO: Draw hover highlight (see: https://github.com/Unity-Technologies/UnityCsReference/blob/61f92bd79ae862c4465d35270f9d1d57befd1761/Editor/Mono/GUI/TreeView/GameObjectTreeViewGUI.cs#L375)
             
             if (selected) Styles.SelectionStyle.Draw(rect, false, false, true, true);
 
