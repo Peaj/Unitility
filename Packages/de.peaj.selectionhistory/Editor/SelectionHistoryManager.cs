@@ -31,7 +31,9 @@ namespace Unitility.SelectionHistory
 
         static SelectionHistoryManager()
         {
-            EditorApplication.update += Update;
+            #if UNITY_EDITOR_WIN
+            EditorApplication.update += GetMouseButtonStates;
+            #endif
             Selection.selectionChanged += OnSelectionChanged;
             AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
             AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
@@ -48,7 +50,12 @@ namespace Unitility.SelectionHistory
             HistoryChanged?.Invoke();
         }
 
-        private static void Update()
+        #if UNITY_EDITOR_WIN
+
+        [DllImport("user32.dll")]
+        public static extern Int16 GetAsyncKeyState(Int32 virtualKeyCode);
+
+        private static void GetMouseButtonStates()
         {
             short backButtonState = GetAsyncKeyState(VK_XBUTTON1);
             short forwardButtonState = GetAsyncKeyState(VK_XBUTTON2);
@@ -58,8 +65,7 @@ namespace Unitility.SelectionHistory
             //if ((state & 0x10000000) > 0) Debug.Log("Held!");
         }
 
-        [DllImport("user32.dll")]
-        public static extern Int16 GetAsyncKeyState(Int32 virtualKeyCode);
+        #endif
 
         private static void OnSelectionChanged()
         {
