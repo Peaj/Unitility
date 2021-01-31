@@ -9,6 +9,7 @@ namespace Unitility.SelectionHistory
         public static HistoryBuffer<T> FromArray(T[] array, int current, int capacity)
         {
             var hb = new HistoryBuffer<T>(capacity);
+            if (array == null) return hb;
             foreach (T item in array) hb.Push(item);
             hb.current = current;
             return hb;

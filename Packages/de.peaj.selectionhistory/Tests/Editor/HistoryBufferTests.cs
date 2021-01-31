@@ -63,5 +63,12 @@ namespace Unitility.SelectionHistory.Tests
             item = buffer.Previous();
             Assert.AreEqual(10, item);
         }
+
+        [Test]
+        public void CreateFromNullArray()
+        {
+            var history = HistoryBuffer<int>.FromArray(null, 2, 5);
+            Assert.AreEqual(0, history.Size);
+        }
     }
 }
