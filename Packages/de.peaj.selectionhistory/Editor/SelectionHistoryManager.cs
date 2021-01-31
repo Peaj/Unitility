@@ -57,6 +57,9 @@ namespace Unitility.SelectionHistory
 
         private static void GetMouseButtonStates()
         {
+            //Only register mouse button input if unity has focus
+            if (!UnityEditorInternal.InternalEditorUtility.isApplicationActive) return;
+            
             short backButtonState = GetAsyncKeyState(VK_XBUTTON1);
             short forwardButtonState = GetAsyncKeyState(VK_XBUTTON2);
 
