@@ -74,6 +74,11 @@ namespace Unitility.SelectionHistory
             return this.array[this.current];
         }
 
+        public void SetCurrent(int index)
+        {
+            this.current = Wrap(this.last + index);
+        }
+
         public void Clear()
         {
             this.current = -1;
@@ -101,11 +106,6 @@ namespace Unitility.SelectionHistory
         {
             if (this.current == -1) return -1;
             return IndexDistance(this.last, this.current);
-        }
-        
-        public int SetCurrentArrayIndex(int index)
-        {
-            return Wrap(this.last+index);
         }
 
         private int IndexDistance(int a, int b)

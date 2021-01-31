@@ -61,8 +61,8 @@ namespace Unitility.SelectionHistory
             for (var i = 0; i < this.history.Length; i++)
             {
                 SelectionSnapshot snapshot = this.history[i];
-                bool isCurrent = i == current && !SelectionHistoryManager.SelectionIsEmpty;
-                if (!snapshot.IsEmpty) DrawSnapshot(snapshot, isCurrent);
+                bool isCurrent = i == current;
+                if (!snapshot.IsEmpty) SelectionSnapshotGUI(snapshot, isCurrent, i);
             }
             EditorGUILayout.EndScrollView();
         }
@@ -77,47 +77,66 @@ namespace Unitility.SelectionHistory
             SelectionHistoryManager.Clear();
         }
 
-        private void DrawSnapshot(SelectionSnapshot snapshot, bool selected)
+        public void Select(int index)
+        {
+            SelectionHistoryManager.HideSelectionFromHistory();
+            //Reverse index because auf reversed list
+            SelectionHistoryManager.Select(SelectionHistoryManager.Size -index -1);
+        }
+
+        private void SelectionSnapshotGUI(SelectionSnapshot snapshot, bool selected, int index)
         {
             Rect rowRect = EditorGUILayout.GetControlRect(
                 hasLabel: true,
                 height: EditorGUIUtility.singleLineHeight, 
                 style: EditorStyles.label);
 
+            rowRect.x -= 2f;
+            rowRect.width += 4f;
+
+            var currentEvent = Event.current;
+            
+            switch (currentEvent.type)
+            {
+                case EventType.MouseDown:
+                    if (rowRect.Contains(currentEvent.mousePosition)) Select(index);
+                        break;
+                case EventType.Repaint:
+                    DrawSelectionSnapShotGUI(rowRect, snapshot, selected);
+                    break;
+            }
+        }
+
+        private void DrawSelectionSnapShotGUI(Rect rect, SelectionSnapshot snapshot, bool selected)
+        {
             float paddingLeft = 5f;
             float iconSize = 16f;
             
-            rowRect.x -= 2f;
-            rowRect.width += 4f;
-            
-            if (Event.current.type == UnityEngine.EventType.Repaint)
+            if (selected) Styles.SelectionStyle.Draw(rect, false, false, true, true);
+
+            var contentRect = rect;
+            contentRect.xMin += paddingLeft;
+
+            GUIContent content = EditorGUIUtility.ObjectContent(snapshot.ActiveObject, snapshot.ActiveObject.GetType());
+            var icon = GetMiniThumbnail(snapshot.ActiveObject);
+
+            var iconRect = contentRect;
+            iconRect.width = iconSize;
+            GUI.DrawTexture(iconRect, icon, ScaleMode.ScaleToFit);
+
+            var labelRect = contentRect;
+            labelRect.xMin += iconSize + 2f;
+            labelRect.yMin += 1f;
+
+            Styles.LineStyle.Draw(labelRect, snapshot.ActiveObject.name, false, false, selected, true);
+
+            int count = snapshot.Objects.Length;
+            if (count > 1) //Show count badge
             {
-                if (selected) Styles.SelectionStyle.Draw(rowRect, false, false, true, true);
-
-                var contentRect = rowRect;
-                contentRect.xMin += paddingLeft;
-
-                GUIContent content = EditorGUIUtility.ObjectContent(snapshot.ActiveObject, snapshot.ActiveObject.GetType());
-                var icon = GetMiniThumbnail(snapshot.ActiveObject);
-
-                var iconRect = contentRect;
-                iconRect.width = iconSize;
-                GUI.DrawTexture(iconRect, icon, ScaleMode.ScaleToFit);
-
-                var labelRect = contentRect;
-                labelRect.xMin += iconSize + 2f;
-                labelRect.yMin += 1f;
-
-                Styles.LineStyle.Draw(labelRect, snapshot.ActiveObject.name, false, false, selected, true);
-
-                int count = snapshot.Objects.Length;
-                if (count > 1) //Show count badge
-                {
-                    var countRect = contentRect;
-                    countRect.xMin += countRect.width-27f;
-                    countRect.yMin += 1;
-                    Styles.CountBadge.Draw(countRect, new GUIContent($"+{count - 1}"), 0);
-                }
+                var countRect = contentRect;
+                countRect.xMin += countRect.width-27f;
+                countRect.yMin += 1;
+                Styles.CountBadge.Draw(countRect, new GUIContent($"+{count - 1}"), 0);
             }
         }
 

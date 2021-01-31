@@ -27,6 +27,7 @@ namespace Unitility.SelectionHistory
         public static HistoryBuffer<SelectionSnapshot> History => history;
         public static SelectionSnapshot Current => History.Current();
         public static bool SelectionIsEmpty => Selection.activeObject == null;
+        public static int Size => history?.Size ?? 0;
         public static Action HistoryChanged;
 
         static SelectionHistoryManager()
@@ -92,6 +93,13 @@ namespace Unitility.SelectionHistory
         {
             Selection.SetActiveObjectWithContext(snapshot.ActiveObject, snapshot.Context);
             Selection.objects = snapshot.Objects;
+        }
+
+        public static void Select(int index)
+        {
+            history.SetCurrent(index);
+            Select(history.Current());
+            HistoryChanged?.Invoke();
         }
 
         [Shortcut("History/Back", null, KeyCode.Home, ShortcutModifiers.Alt)]
