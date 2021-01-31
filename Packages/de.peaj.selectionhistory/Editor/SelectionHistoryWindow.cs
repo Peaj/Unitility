@@ -30,8 +30,8 @@ namespace Unitility.SelectionHistory
         private bool isDragging = false;
 
         
-        [MenuItem("Window/Selection History")]
-        static void Init()
+        [MenuItem("Window/Unitility/Selection History")]
+        private static void Open()
         {
             SelectionHistoryWindow window = (SelectionHistoryWindow) GetWindow(typeof(SelectionHistoryWindow));
             window.titleContent = new GUIContent("Selection History");
