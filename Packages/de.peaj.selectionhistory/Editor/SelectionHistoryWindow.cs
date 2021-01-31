@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace Unitility.SelectionHistory
 {
-    public class SelectionHistoryWindow : EditorWindow
+    public class SelectionHistoryWindow : EditorWindow, IHasCustomMenu
     {
         private static class Styles
         {
@@ -65,6 +65,16 @@ namespace Unitility.SelectionHistory
                 if (!snapshot.IsEmpty) DrawSnapshot(snapshot, isCurrent);
             }
             EditorGUILayout.EndScrollView();
+        }
+        
+        public virtual void AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem(EditorGUIUtility.TrTextContent("Clear"), false, Clear);
+        }
+        
+        public void Clear()
+        {
+            SelectionHistoryManager.Clear();
         }
 
         private void DrawSnapshot(SelectionSnapshot snapshot, bool selected)
