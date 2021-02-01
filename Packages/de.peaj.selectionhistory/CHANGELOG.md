@@ -4,6 +4,10 @@ All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2021-02-01
+### Fixed
+- Updated package.json to have correct version number
+
 ## [1.1.0] - 2021-02-01
 
 This release greatly enhances the usability of the Selection History Window.
