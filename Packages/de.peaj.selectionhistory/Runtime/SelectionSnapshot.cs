@@ -1,8 +1,18 @@
 ﻿using System;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Unitility.SelectionHistory
 {
+    #if USE_ENTITIES
+    public class EntitySelectionWrapper : ScriptableObject
+    {
+        public int EntityIndex;
+        public int EntityVersion;
+        public string WorldName;
+    }
+    #endif
+    
     [Serializable]
     public class SelectionSnapshot
     {

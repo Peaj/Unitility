@@ -1,7 +1,9 @@
 {
     "name": "Peaj.SelectionHistory.Editor",
     "references": [
-        "GUID:cfb30589bae3bf84b8512586ece72755"
+        "GUID:cfb30589bae3bf84b8512586ece72755",
+        "GUID:c38fb62397af04c51b143415e1db6d90",
+        "GUID:734d92eba21c94caba915361bd5ac177"
     ],
     "includePlatforms": [
         "Editor"
@@ -12,6 +14,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.entities",
+            "expression": "0.11",
+            "define": "USE_ENTITIES"
+        }
+    ],
     "noEngineReferences": false
 }

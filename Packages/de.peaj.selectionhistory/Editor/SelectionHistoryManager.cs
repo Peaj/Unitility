@@ -1,6 +1,4 @@
 ﻿//TODO: Add folder selection
-//TODO: Handle deselection
-//TODO: Recover from domain reload
 
 using System;
 using System.Collections;
@@ -8,9 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using NUnit.Framework.Constraints;
+using Unity.Entities;
 using UnityEditor;
 using UnityEditor.ShortcutManagement;
 using UnityEngine;
+using Object = System.Object;
+#if USE_ENTITIES
+using Unity.Entities.Editor;
+#endif
 
 namespace Unitility.SelectionHistory
 {
@@ -29,6 +32,10 @@ namespace Unitility.SelectionHistory
         public static bool SelectionIsEmpty => Selection.activeObject == null;
         public static int Size => history?.Size ?? 0;
         public static Action HistoryChanged;
+        
+        #if USE_ENTITIES
+        private static EntitySelectionProxy entitySelectionProxy;
+        #endif
 
         static SelectionHistoryManager()
         {
@@ -89,14 +96,76 @@ namespace Unitility.SelectionHistory
 
         public static SelectionSnapshot TakeSnapshot()
         {
-            return new SelectionSnapshot(Selection.activeObject, Selection.objects, Selection.activeContext);
+            var activeObject = Selection.activeObject;
+            var objects = Selection.objects;
+            
+            
+            #if USE_ENTITIES
+            if (activeObject is EntitySelectionProxy)
+            {
+                var selectionProxy = activeObject as EntitySelectionProxy;
+                var entitySelectionWrapper = ObjectFactory.CreateInstance<EntitySelectionWrapper>();
+                entitySelectionWrapper.hideFlags = HideFlags.HideAndDontSave;
+
+                entitySelectionWrapper.EntityIndex =  selectionProxy.Entity.Index;
+                entitySelectionWrapper.EntityVersion = selectionProxy.Entity.Version;
+                entitySelectionWrapper.WorldName = selectionProxy.World.Name;
+                entitySelectionWrapper.name = selectionProxy.EntityManager.GetName(selectionProxy.Entity);
+
+                activeObject = entitySelectionWrapper;
+                objects = new[] {activeObject};
+            }
+            #endif
+            
+            var selection = new SelectionSnapshot(activeObject, objects, Selection.activeContext);
+            
+            Debug.Log(selection.ToString());
+            return selection;
         }
 
         public static void Select(SelectionSnapshot snapshot)
         {
+            #if USE_ENTITIES
+            if (snapshot.ActiveObject is EntitySelectionWrapper)
+            {
+                var wrapper = snapshot.ActiveObject as EntitySelectionWrapper;
+                var proxy = GetEntitySelectionProxy();
+                var world = FindWorldByName(wrapper.WorldName);
+                proxy.SetEntity(world, new Entity() { Index = wrapper.EntityIndex, Version = wrapper.EntityVersion });
+                Selection.SetActiveObjectWithContext(proxy, null);
+                Selection.objects = new[] {proxy};
+                //TODO: Set selection in Entity Hierarchy Window
+                return;
+            }
+            #endif
             Selection.SetActiveObjectWithContext(snapshot.ActiveObject, snapshot.Context);
             Selection.objects = snapshot.Objects;
         }
+        
+        #if USE_ENTITIES
+        public static World FindWorldByName(string name)
+        {
+            if (World.All.Count == 0) return null;
+
+            var selectedWorld = World.All[0];
+            if (string.IsNullOrEmpty(name)) return selectedWorld;
+
+            foreach (var world in World.All)
+            {
+                if (world.Name == name) return world;
+            }
+            return selectedWorld;
+        }
+
+        public static EntitySelectionProxy GetEntitySelectionProxy()
+        {
+            entitySelectionProxy = Resources.FindObjectsOfTypeAll<EntitySelectionProxy>().FirstOrDefault();
+            if (entitySelectionProxy != null) return entitySelectionProxy; 
+            entitySelectionProxy = ScriptableObject.CreateInstance<EntitySelectionProxy>();
+            entitySelectionProxy.hideFlags = HideFlags.HideAndDontSave;
+            return entitySelectionProxy;
+        }
+        #endif
 
         public static void Select(int index)
         {
